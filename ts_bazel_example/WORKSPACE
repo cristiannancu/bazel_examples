@@ -1,0 +1,74 @@
+workspace(name = "test_workspace")
+
+git_repository(
+    name = "build_bazel_rules_nodejs",
+    remote = "https://github.com/bazelbuild/rules_nodejs.git",
+    tag = "0.8.0", # check for the latest tag when you install
+)
+
+# ----------------------------------------------------------------------
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
+
+# NOTE: this rule installs nodejs, npm, and yarn, but does NOT install
+# your npm dependencies into your node_modules folder.
+# You must still run the package manager to do this.
+node_repositories(package_json = ["//:package.json"])
+
+# NOTE: this rule installs nodejs, npm, and yarn, but does NOT install
+# your npm dependencies into your node_modules folder.
+# You must still run the package manager to do this.
+node_repositories(
+    package_json = ["//:package.json"],
+    node_version = "8.11.1",
+    yarn_version = "1.5.1",
+)
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "yarn_install")
+
+yarn_install(
+    name = "yarn_managed",
+    package_json = "//:package.json",
+    yarn_lock = "//:yarn.lock"
+)
+
+# ----------------------------------------------------------------------
+
+# Include @bazel/typescript in package.json#devDependencies
+http_archive(
+    name = "build_bazel_rules_typescript",
+    url = "https://github.com/bazelbuild/rules_typescript/archive/v0.13.0.zip",
+    strip_prefix = "rules_typescript-0.13.0",
+)
+
+# ts_web_test depends on the web testing rules to provision browsers.
+http_archive(
+    name = "io_bazel_rules_webtesting",
+    url = "https://github.com/bazelbuild/rules_webtesting/archive/v0.2.0.zip",
+    strip_prefix = "rules_webtesting-0.2.0",
+    sha256 = "cecc12f07e95740750a40d38e8b14b76fefa1551bef9332cb432d564d693723c",
+)
+
+# ts_devserver depends on the Go rules.
+# See https://github.com/bazelbuild/rules_go#setup for the latest version.
+http_archive(
+    name = "io_bazel_rules_go",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.8.1/rules_go-0.8.1.tar.gz",
+    sha256 = "90bb270d0a92ed5c83558b2797346917c46547f6f7103e648941ecdb6b9d0e72",
+)
+
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+
+go_rules_dependencies()
+go_register_toolchains()
+
+load("@io_bazel_rules_webtesting//web:repositories.bzl", "browser_repositories", "web_test_repositories")
+
+web_test_repositories()
+browser_repositories(
+    chromium = True,
+)
+
+load("@build_bazel_rules_typescript//:defs.bzl", "ts_setup_workspace")
+
+ts_setup_workspace()

@@ -1,0 +1,11 @@
+{
+  "name": "my_example",
+  "version": "1.0.0",
+  "description": "Example project for building TS with Bazel",
+  "dependencies": {
+    "typescript": "^2.9.2"
+  },
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  }
+}
